@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animação Multi-Armed Bandit</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Tooltips library -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+</head>
+<body>
+    <h1>Explorando Multi-Armed Bandits (MAB)</h1>
+
+    <div class="info-panel">
+        <div class="algo-explanation">
+            <h3>Sobre o Algoritmo: <span id="current-algorithm-name">Greedy (Ganancioso)</span></h3>
+            <p id="algorithm-explanation">
+                O algoritmo Greedy sempre escolhe o braço com a maior estimativa de recompensa, sem exploração.
+            </p>
+            <div class="algorithm-formula">
+                <span id="algorithm-formula">Seleção: argmax[a] Q(a)</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <label for="algorithm-select">Algoritmo:</label>
+        <select id="algorithm-select">
+            <option value="greedy">Greedy (Ganancioso)</option>
+            <option value="epsilon-greedy">ε-Greedy (Epsilon-Ganancioso)</option>
+            <option value="ucb">UCB (Upper Confidence Bound)</option>
+            <option value="thompson">Thompson Sampling</option>
+        </select>
+
+        <div class="parameters">
+             <span id="epsilon-control" class="param-control">
+                <label for="epsilon-slider">ε (Epsilon):</label>
+                <input type="range" id="epsilon-slider" min="0" max="1" step="0.01" value="0.1">
+                <span id="epsilon-value">0.1</span>
+             </span>
+             <span id="ucb-control" class="param-control" style="display: none;">
+                 <label for="ucb-slider">c (UCB Factor):</label>
+                 <input type="range" id="ucb-slider" min="0" max="5" step="0.1" value="2">
+                 <span id="ucb-value">2.0</span>
+            </span>
+            <span id="thompson-control" class="param-control" style="display: none;">
+                <label>Priores Beta(1,1)</label>
+            </span>
+        </div>
+
+        <div class="control-buttons">
+            <button id="step-btn" class="step-button">Passo a Passo</button>
+            <button id="start-pause-btn">Iniciar</button>
+            <button id="reset-btn">Resetar</button>
+
+            <label for="speed-slider">Velocidade:</label>
+            <input type="range" id="speed-slider" min="50" max="1000" step="50" value="500">
+            <span id="speed-value">500ms</span>
+        </div>
+    </div>
+    
+    <div class="bandits-config">
+        <button id="config-toggle" class="config-button">Configurar Bandits ▼</button>
+        <div id="config-panel" class="config-panel" style="display: none;">
+            <h3>Configurar Probabilidades dos Braços</h3>
+            <div id="bandit-config-container"></div>
+            <button id="apply-config">Aplicar Configuração</button>
+        </div>
+    </div>
+
+    <div class="simulation-area">
+        <div id="bandits-container">
+            <!-- Bandits will be generated here by JS -->
+        </div>
+        <div id="feedback-area">
+             <p>Passo: <span id="step-counter">0</span></p>
+             <p>Recompensa Total: <span id="total-reward">0</span></p>
+             <p>Recompensa Ótima Teórica: <span id="optimal-reward">0</span></p>
+             <p>Regret: <span id="regret">0</span></p>
+             <p id="action-feedback">Pronto para começar.</p>
+        </div>
+    </div>
+
+    <div class="stats-area">
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Recompensa Cumulativa</h3>
+                <canvas id="reward-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Número de Escolhas por Braço</h3>
+                <canvas id="pulls-chart"></canvas>
+            </div>
+        </div>
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Regret Cumulativo</h3>
+                <canvas id="regret-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Exploração vs. Exploração</h3>
+                <canvas id="explore-exploit-chart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltips" style="display:none">
+        <div id="tooltip-greedy">
+            O algoritmo Greedy sempre escolhe a ação com a maior estimativa de valor, 
+            maximizando ganhos imediatos sem considerar exploração.
+        </div>
+        <div id="tooltip-epsilon-greedy">
+            O algoritmo ε-Greedy escolhe a melhor ação com probabilidade 1-ε, 
+            e uma ação aleatória com probabilidade ε, equilibrando exploração e exploração.
+        </div>
+        <div id="tooltip-ucb">
+            UCB adiciona um bônus de exploração às estimativas, favorecendo braços menos puxados. 
+            O parâmetro c controla o peso da exploração.
+        </div>
+        <div id="tooltip-thompson">
+            Thompson Sampling utiliza distribuições Beta como priores para modelar incerteza
+            e toma decisões pela amostragem dessas distribuições.
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
