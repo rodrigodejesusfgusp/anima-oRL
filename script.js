@@ -21,6 +21,8 @@ const regretSpan = document.getElementById('regret');
 const currentAlgorithmName = document.getElementById('current-algorithm-name');
 const algorithmExplanation = document.getElementById('algorithm-explanation');
 const algorithmFormula = document.getElementById('algorithm-formula');
+const maxStepsInput = document.getElementById('max-steps-input');
+const autoStopCheckbox = document.getElementById('auto-stop-checkbox');
 
 // Config panel elements
 const configToggleBtn = document.getElementById('config-toggle');
@@ -44,6 +46,8 @@ let regret = 0;
 let isRunning = false;
 let simulationInterval;
 let intervalTime = 500; // ms
+let maxSteps = 100; // Default max steps
+let autoStopEnabled = false;
 let rewardHistory = []; // For reward chart
 let optimalRewardHistory = []; // For optimal theoretical reward
 let regretHistory = []; // For regret chart
@@ -558,6 +562,14 @@ function simulationStep() {
         isRunning = false;
         startPauseBtn.textContent = 'Continuar';
     }
+    
+    // 10. Check if we've reached the maximum steps
+    if (autoStopEnabled && step >= maxSteps) {
+        clearInterval(simulationInterval);
+        isRunning = false;
+        startPauseBtn.textContent = 'Iniciar';
+        actionFeedbackP.textContent = `Simulação parada após ${maxSteps} passos.`;
+    }
 }
 
 // --- UI Update ---
@@ -660,7 +672,11 @@ startPauseBtn.addEventListener('click', () => {
         clearInterval(simulationInterval);
         startPauseBtn.textContent = 'Continuar';
     } else {
-        simulationInterval = setInterval(simulationStep, intervalTime);
+        if (intervalTime < 20) {
+            adjustTimerForPerformance();
+        } else {
+            simulationInterval = setInterval(simulationStep, intervalTime);
+        }
         startPauseBtn.textContent = 'Pausar';
     }
     isRunning = !isRunning;
@@ -688,7 +704,7 @@ algorithmSelect.addEventListener('change', () => {
 
 speedSlider.addEventListener('input', (e) => {
     // Invert the slider value: faster speed means smaller interval
-    intervalTime = 1050 - parseInt(e.target.value);
+    intervalTime = 1010 - parseInt(e.target.value);
     speedValueSpan.textContent = `${intervalTime}ms`;
     
     if (isRunning) {
@@ -698,14 +714,17 @@ speedSlider.addEventListener('input', (e) => {
     }
 });
 
-epsilonSlider.addEventListener('input', (e) => {
-    epsilon = parseFloat(e.target.value);
-    epsilonValueSpan.textContent = epsilon.toFixed(2);
+// Max steps controls
+maxStepsInput.addEventListener('input', (e) => {
+    maxSteps = parseInt(e.target.value);
+    if (isNaN(maxSteps) || maxSteps < 1) {
+        maxSteps = 100;
+        maxStepsInput.value = 100;
+    }
 });
 
-ucbSlider.addEventListener('input', (e) => {
-    ucbC = parseFloat(e.target.value);
-    ucbValueSpan.textContent = ucbC.toFixed(1);
+autoStopCheckbox.addEventListener('change', (e) => {
+    autoStopEnabled = e.target.checked;
 });
 
 // Bandit configuration panel
@@ -734,12 +753,47 @@ applyConfigBtn.addEventListener('click', () => {
     configToggleBtn.textContent = 'Configurar Bandits ▼';
 });
 
-// --- Setup tooltips ---
+// --- Setup tooltips and initialize ---
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize tooltips if tippy.js is loaded
     if (typeof tippy === 'function') {
         tippy('[data-tippy-content]');
     }
     
+    // Set default values
+    maxSteps = parseInt(maxStepsInput.value);
+    autoStopEnabled = autoStopCheckbox.checked;
+    
     resetSimulation(); // Initialize everything on load
 });
+
+// Função para verificar e ajustar o tempo de acordo com a performance do navegador
+function adjustTimerForPerformance() {
+    if (intervalTime < 20) {
+        // Para intervalos muito pequenos, podemos usar requestAnimationFrame para melhor desempenho
+        if (isRunning) {
+            clearInterval(simulationInterval);
+            let lastFrameTime = 0;
+            
+            const animationLoop = (timestamp) => {
+                if (!isRunning) return;
+                
+                // Executar a cada X ms, mesmo com requestAnimationFrame
+                if (timestamp - lastFrameTime >= intervalTime) {
+                    lastFrameTime = timestamp;
+                    simulationStep();
+                }
+                
+                requestAnimationFrame(animationLoop);
+            };
+            
+            requestAnimationFrame(animationLoop);
+        }
+    } else {
+        // Usar setInterval para intervalos normais
+        if (isRunning) {
+            clearInterval(simulationInterval);
+            simulationInterval = setInterval(simulationStep, intervalTime);
+        }
+    }
+}

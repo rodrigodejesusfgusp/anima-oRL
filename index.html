@@ -57,8 +57,16 @@
             <button id="reset-btn">Resetar</button>
 
             <label for="speed-slider">Velocidade:</label>
-            <input type="range" id="speed-slider" min="50" max="1000" step="50" value="500">
+            <input type="range" id="speed-slider" min="10" max="1000" step="10" value="500">
             <span id="speed-value">500ms</span>
+            
+            <div class="max-steps-control">
+                <label for="max-steps-input">Parar após:</label>
+                <input type="number" id="max-steps-input" min="1" value="100" step="1">
+                <span>passos</span>
+                <input type="checkbox" id="auto-stop-checkbox">
+                <label for="auto-stop-checkbox">Ativar</label>
+            </div>
         </div>
     </div>
     
@@ -107,6 +115,39 @@
         </div>
     </div>
     
+    <div class="info-section">
+        <h3>Comportamento Esperado dos Algoritmos</h3>
+        <div class="timeline-info">
+            <div class="timeline-phase">
+                <h4>Curto Prazo</h4>
+                <ul>
+                    <li><strong>Greedy:</strong> Converge rapidamente para um máximo local</li>
+                    <li><strong>ε-Greedy:</strong> Explora mais amplamente com convergência mais lenta</li>
+                    <li><strong>UCB:</strong> Explora sistematicamente os braços mais promissores</li>
+                    <li><strong>Thompson:</strong> Equilibra exploração/exploração eficientemente</li>
+                </ul>
+            </div>
+            <div class="timeline-phase">
+                <h4>Médio Prazo</h4>
+                <ul>
+                    <li><strong>Greedy:</strong> Frequentemente fica preso em máximos locais</li>
+                    <li><strong>ε-Greedy:</strong> Mantém exploração constante, convergindo lentamente</li>
+                    <li><strong>UCB:</strong> Reduz exploração de braços claramente subótimos</li>
+                    <li><strong>Thompson:</strong> Concentra mais na exploração de braços promissores</li>
+                </ul>
+            </div>
+            <div class="timeline-phase">
+                <h4>Longo Prazo</h4>
+                <ul>
+                    <li><strong>Greedy:</strong> Permanece no máximo local encontrado inicialmente</li>
+                    <li><strong>ε-Greedy:</strong> Continua explorando com taxa fixa ε</li>
+                    <li><strong>UCB:</strong> Converge para o braço ótimo com regret sublinear</li>
+                    <li><strong>Thompson:</strong> Converge para o braço ótimo com alta probabilidade</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+        
     <div class="tooltips" style="display:none">
         <div id="tooltip-greedy">
             O algoritmo Greedy sempre escolhe a ação com a maior estimativa de valor, 
